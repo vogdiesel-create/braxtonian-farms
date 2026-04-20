@@ -14,7 +14,6 @@ import random
 import threading
 from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request
-from flask_socketio import SocketIO
 
 # ---------------------------------------------------------------------------
 # Config
@@ -33,7 +32,7 @@ TARGETS = {
     "water_temp": {"min": 60, "max": 72, "unit": "F"},
 }
 
-# Relay channel assignments (accent the 8-channel relay)
+# Relay channel assignments
 RELAYS = {
     0: {"name": "Grow Light", "state": False, "auto": True},
     1: {"name": "Air Pump", "state": False, "auto": True},
@@ -50,12 +49,12 @@ LIGHT_ON_HOUR = 8    # 8 AM
 LIGHT_OFF_HOUR = 22  # 10 PM (14 hours on)
 
 # Chiller control
-CHILLER_ON_TEMP = 70   # turn chiller on above this
-CHILLER_OFF_TEMP = 66  # turn chiller off below this
+CHILLER_ON_TEMP = 70
+CHILLER_OFF_TEMP = 66
 
-# Exhaust fan control (tent air temp)
-EXHAUST_ON_TEMP = 80   # kick fan on above this
-EXHAUST_OFF_TEMP = 76  # turn fan off below this
+# Exhaust fan control
+EXHAUST_ON_TEMP = 80
+EXHAUST_OFF_TEMP = 76
 
 # Plant info
 PLANTS = {
@@ -87,14 +86,12 @@ def init_db():
             message TEXT NOT NULL
         )
     """)
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_sensor_ts ON sensor_log(timestamp)
-    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_sensor_ts ON sensor_log(timestamp)")
     conn.commit()
     conn.close()
 
 
-def log_sensor(sensor: str, value: float, bucket: str = None):
+def log_sensor(sensor, value, bucket=None):
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         "INSERT INTO sensor_log (timestamp, sensor, value, bucket) VALUES (?, ?, ?, ?)",
@@ -104,7 +101,7 @@ def log_sensor(sensor: str, value: float, bucket: str = None):
     conn.close()
 
 
-def log_event(event_type: str, message: str):
+def log_event(event_type, message):
     conn = sqlite3.connect(DB_PATH)
     conn.execute(
         "INSERT INTO events (timestamp, event_type, message) VALUES (?, ?, ?)",
@@ -114,7 +111,7 @@ def log_event(event_type: str, message: str):
     conn.close()
 
 
-def get_sensor_history(sensor: str, hours: int = 24, bucket: str = None):
+def get_sensor_history(sensor, hours=24, bucket=None):
     conn = sqlite3.connect(DB_PATH)
     since = (datetime.now() - timedelta(hours=hours)).isoformat()
     if bucket:
@@ -131,7 +128,7 @@ def get_sensor_history(sensor: str, hours: int = 24, bucket: str = None):
     return [{"t": r[0], "v": r[1]} for r in rows]
 
 
-def get_recent_events(limit: int = 20):
+def get_recent_events(limit=20):
     conn = sqlite3.connect(DB_PATH)
     rows = conn.execute(
         "SELECT timestamp, event_type, message FROM events ORDER BY id DESC LIMIT ?",
@@ -146,8 +143,6 @@ def get_recent_events(limit: int = 20):
 # ---------------------------------------------------------------------------
 
 class MockSensors:
-    """Simulates sensor readings with realistic drift."""
-
     def __init__(self):
         self.ph = 6.0
         self.ec = 1.5
@@ -155,38 +150,23 @@ class MockSensors:
         self.air_temp = 72.0
         self.water_temp = 68.0
 
-    def read_ph(self):
+    def read_all(self):
         self.ph += random.uniform(-0.05, 0.05)
         self.ph = max(4.0, min(8.0, self.ph))
-        return round(self.ph, 2)
-
-    def read_ec(self):
         self.ec += random.uniform(-0.02, 0.02)
         self.ec = max(0.5, min(3.0, self.ec))
-        return round(self.ec, 2)
-
-    def read_water_level(self):
-        self.water_level -= random.uniform(0, 0.005)  # slowly drops
+        self.water_level -= random.uniform(0, 0.005)
         self.water_level = max(0.0, min(1.0, self.water_level))
-        return round(self.water_level, 2)
-
-    def read_temp(self):
         self.air_temp += random.uniform(-0.3, 0.3)
         self.air_temp = max(60, min(90, self.air_temp))
-        return round(self.air_temp, 1)
-
-    def read_water_temp(self):
         self.water_temp += random.uniform(-0.2, 0.2)
         self.water_temp = max(55, min(80, self.water_temp))
-        return round(self.water_temp, 1)
-
-    def read_all(self):
         return {
-            "ph": self.read_ph(),
-            "ec": self.read_ec(),
-            "water_level": self.read_water_level(),
-            "air_temp": self.read_temp(),
-            "water_temp": self.read_water_temp(),
+            "ph": round(self.ph, 2),
+            "ec": round(self.ec, 2),
+            "water_level": round(self.water_level, 2),
+            "air_temp": round(self.air_temp, 1),
+            "water_temp": round(self.water_temp, 1),
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -198,21 +178,19 @@ latest_readings = {}
 # Relay control
 # ---------------------------------------------------------------------------
 
-def set_relay(channel: int, state: bool):
-    """Set relay on/off. Uses GPIO when hardware is connected."""
+def set_relay(channel, state):
     if channel not in RELAYS:
         return False
     RELAYS[channel]["state"] = state
     if USE_REAL_GPIO:
         try:
             import RPi.GPIO as GPIO
-            # GPIO pin mapping (BCM mode) - update when wiring
-            pins = {0: 17, 1: 27, 2: 22, 3: 23, 4: 24, 5: 25, 6: 5, 7: 6}
+            pins = {0: 17, 1: 27, 2: 22, 3: 5, 4: 6, 5: 13, 6: 19, 7: 26}
             pin = pins.get(channel)
             if pin:
                 GPIO.setmode(GPIO.BCM)
                 GPIO.setup(pin, GPIO.OUT)
-                GPIO.output(pin, GPIO.LOW if state else GPIO.HIGH)  # relay is active-low
+                GPIO.output(pin, GPIO.LOW if state else GPIO.HIGH)
         except ImportError:
             pass
     action = "ON" if state else "OFF"
@@ -221,18 +199,13 @@ def set_relay(channel: int, state: bool):
 
 
 def check_light_schedule():
-    """Auto-control grow light based on schedule."""
     hour = datetime.now().hour
-    if LIGHT_ON_HOUR <= LIGHT_OFF_HOUR:
-        should_be_on = LIGHT_ON_HOUR <= hour < LIGHT_OFF_HOUR
-    else:
-        should_be_on = hour >= LIGHT_ON_HOUR or hour < LIGHT_OFF_HOUR
+    should_be_on = LIGHT_ON_HOUR <= hour < LIGHT_OFF_HOUR
     if RELAYS[0]["auto"] and RELAYS[0]["state"] != should_be_on:
         set_relay(0, should_be_on)
 
 
-def check_chiller(water_temp: float):
-    """Auto-control chiller with hysteresis to prevent rapid cycling."""
+def check_chiller(water_temp):
     if not RELAYS[3]["auto"]:
         return
     if water_temp >= CHILLER_ON_TEMP and not RELAYS[3]["state"]:
@@ -241,8 +214,7 @@ def check_chiller(water_temp: float):
         set_relay(3, False)
 
 
-def check_exhaust(air_temp: float):
-    """Auto-control tent exhaust fan based on air temp."""
+def check_exhaust(air_temp):
     if not RELAYS[2]["auto"]:
         return
     if air_temp >= EXHAUST_ON_TEMP and not RELAYS[2]["state"]:
@@ -255,27 +227,19 @@ def check_exhaust(air_temp: float):
 # Background sensor loop
 # ---------------------------------------------------------------------------
 
-def sensor_loop(socketio):
-    """Read sensors every SENSOR_INTERVAL seconds, log + broadcast."""
+def sensor_loop():
     global latest_readings
     while True:
         readings = sensors.read_all()
         latest_readings = readings
 
-        # Log to DB
         for key in ["ph", "ec", "water_level", "air_temp", "water_temp"]:
             log_sensor(key, readings[key])
 
-        # Check light schedule
         check_light_schedule()
-
-        # Check chiller (hysteresis control)
         check_chiller(readings["water_temp"])
-
-        # Check exhaust fan (tent air temp)
         check_exhaust(readings["air_temp"])
 
-        # Check alerts
         alerts = []
         for key, target in TARGETS.items():
             val = readings.get(key, 0)
@@ -287,9 +251,6 @@ def sensor_loop(socketio):
         readings["alerts"] = alerts
         readings["relays"] = {str(k): v for k, v in RELAYS.items()}
 
-        # Broadcast to connected clients
-        socketio.emit("sensor_update", readings)
-
         time.sleep(SENSOR_INTERVAL)
 
 
@@ -298,8 +259,6 @@ def sensor_loop(socketio):
 # ---------------------------------------------------------------------------
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "braxtonian-farms-2026"
-socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.route("/")
@@ -324,14 +283,6 @@ def api_history(sensor):
 def api_events():
     limit = request.args.get("limit", 20, type=int)
     return jsonify(get_recent_events(limit))
-
-
-@app.route("/api/relay/<int:channel>", methods=["POST"])
-def api_relay(channel):
-    body = request.get_json() or {}
-    state = body.get("state", False)
-    ok = set_relay(channel, state)
-    return jsonify({"ok": ok, "channel": channel, "state": state})
 
 
 @app.route("/api/relay/<int:channel>/toggle", methods=["POST"])
@@ -363,10 +314,9 @@ if __name__ == "__main__":
     init_db()
     log_event("system", "Grow controller started")
 
-    # Start sensor reading thread
-    t = threading.Thread(target=sensor_loop, args=(socketio,), daemon=True)
+    t = threading.Thread(target=sensor_loop, daemon=True)
     t.start()
 
     print("Braxtonian Farms - Grow Dashboard")
     print("http://localhost:5000")
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False, allow_unsafe_werkzeug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
