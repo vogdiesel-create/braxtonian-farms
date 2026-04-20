@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #1a1a2e; margin: 0; padding: 20px; font-family: 'Segoe UI', sans-serif; }
+  svg { display: block; margin: 0 auto; }
+  text { fill: #e0e0e0; }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 1000 750" width="1000" height="750" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d6a4f" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1b4332" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="bucket" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a3a5c"/>
+      <stop offset="100%" stop-color="#2a2a4a"/>
+    </linearGradient>
+    <linearGradient id="reservoir" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a4a"/>
+      <stop offset="100%" stop-color="#1a1a3a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="35" text-anchor="middle" font-size="22" font-weight="bold" fill="#00d4aa">Tim's RDWC + Top-Feed Hybrid System</text>
+  <text x="500" y="55" text-anchor="middle" font-size="13" fill="#888">Braxtonian Farms -- Black Krim + Evil Olive</text>
+
+  <!-- Grow Light -->
+  <rect x="200" y="70" width="600" height="18" rx="4" fill="#ffb700" opacity="0.7"/>
+  <text x="500" y="83" text-anchor="middle" font-size="11" fill="#1a1a2e" font-weight="bold">Carambola CBG4000DM -- 560W Grow Light (14/10 schedule)</text>
+  <!-- Light rays -->
+  <line x1="300" y1="88" x2="280" y2="130" stroke="#ffb700" stroke-width="1" opacity="0.3"/>
+  <line x1="400" y1="88" x2="390" y2="130" stroke="#ffb700" stroke-width="1" opacity="0.3"/>
+  <line x1="500" y1="88" x2="500" y2="130" stroke="#ffb700" stroke-width="1" opacity="0.3"/>
+  <line x1="600" y1="88" x2="610" y2="130" stroke="#ffb700" stroke-width="1" opacity="0.3"/>
+  <line x1="700" y1="88" x2="720" y2="130" stroke="#ffb700" stroke-width="1" opacity="0.3"/>
+
+  <!-- Drip rings -->
+  <ellipse cx="270" cy="145" rx="55" ry="8" fill="none" stroke="#4fc3f7" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="270" y="135" text-anchor="middle" font-size="9" fill="#4fc3f7">Drip Ring</text>
+  <ellipse cx="730" cy="145" rx="55" ry="8" fill="none" stroke="#4fc3f7" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="730" y="135" text-anchor="middle" font-size="9" fill="#4fc3f7">Drip Ring</text>
+
+  <!-- Plants -->
+  <text x="270" y="120" text-anchor="middle" font-size="28" fill="#4caf50">&#127793;</text>
+  <text x="270" y="113" text-anchor="middle" font-size="9" fill="#81c784">Black Krim</text>
+  <text x="730" y="120" text-anchor="middle" font-size="28" fill="#66bb6a">&#127793;</text>
+  <text x="730" y="113" text-anchor="middle" font-size="9" fill="#81c784">Evil Olive</text>
+
+  <!-- BUCKET A -->
+  <rect x="195" y="150" width="150" height="170" rx="6" fill="url(#bucket)" stroke="#555" stroke-width="2"/>
+  <!-- Net pot lid -->
+  <rect x="190" y="148" width="160" height="12" rx="3" fill="#4a4a6a" stroke="#666" stroke-width="1"/>
+  <text x="270" y="157" text-anchor="middle" font-size="8" fill="#aaa">Net Pot Lid + Clay Pebbles</text>
+  <!-- Water -->
+  <rect x="198" y="200" width="144" height="117" rx="3" fill="url(#water)"/>
+  <!-- Air stone -->
+  <ellipse cx="270" cy="305" rx="25" ry="5" fill="#666" stroke="#888" stroke-width="1"/>
+  <text x="270" y="308" text-anchor="middle" font-size="7" fill="#ccc">Air Stone</text>
+  <!-- Bubbles -->
+  <circle cx="260" cy="290" r="2" fill="#4fc3f7" opacity="0.4"/>
+  <circle cx="275" cy="280" r="1.5" fill="#4fc3f7" opacity="0.3"/>
+  <circle cx="265" cy="270" r="2" fill="#4fc3f7" opacity="0.35"/>
+  <!-- DS18B20 -->
+  <rect x="310" y="260" width="4" height="30" rx="1" fill="#f44336"/>
+  <text x="335" y="278" text-anchor="start" font-size="8" fill="#f44336">DS18B20</text>
+  <!-- Water level -->
+  <rect x="200" y="195" width="3" height="50" fill="#ff9800" opacity="0.7"/>
+  <text x="190" y="225" text-anchor="end" font-size="8" fill="#ff9800">WL</text>
+
+  <text x="270" y="340" text-anchor="middle" font-size="13" font-weight="bold" fill="#81c784">Bucket A</text>
+  <text x="270" y="353" text-anchor="middle" font-size="10" fill="#aaa">5 gal</text>
+
+  <!-- BUCKET B -->
+  <rect x="655" y="150" width="150" height="170" rx="6" fill="url(#bucket)" stroke="#555" stroke-width="2"/>
+  <!-- Net pot lid -->
+  <rect x="650" y="148" width="160" height="12" rx="3" fill="#4a4a6a" stroke="#666" stroke-width="1"/>
+  <text x="730" y="157" text-anchor="middle" font-size="8" fill="#aaa">Net Pot Lid + Clay Pebbles</text>
+  <!-- Water -->
+  <rect x="658" y="200" width="144" height="117" rx="3" fill="url(#water)"/>
+  <!-- Air stone -->
+  <ellipse cx="730" cy="305" rx="25" ry="5" fill="#666" stroke="#888" stroke-width="1"/>
+  <text x="730" y="308" text-anchor="middle" font-size="7" fill="#ccc">Air Stone</text>
+  <!-- Bubbles -->
+  <circle cx="720" cy="290" r="2" fill="#4fc3f7" opacity="0.4"/>
+  <circle cx="735" cy="280" r="1.5" fill="#4fc3f7" opacity="0.3"/>
+  <circle cx="725" cy="270" r="2" fill="#4fc3f7" opacity="0.35"/>
+  <!-- DS18B20 -->
+  <rect x="690" y="260" width="4" height="30" rx="1" fill="#f44336"/>
+  <text x="680" y="278" text-anchor="end" font-size="8" fill="#f44336">DS18B20</text>
+  <!-- Water level -->
+  <rect x="800" y="195" width="3" height="50" fill="#ff9800" opacity="0.7"/>
+  <text x="813" y="225" text-anchor="start" font-size="8" fill="#ff9800">WL</text>
+
+  <text x="730" y="340" text-anchor="middle" font-size="13" font-weight="bold" fill="#81c784">Bucket B</text>
+  <text x="730" y="353" text-anchor="middle" font-size="10" fill="#aaa">5 gal</text>
+
+  <!-- PVC Connections (bucket to reservoir) -->
+  <line x1="270" y1="320" x2="270" y2="400" stroke="#78909c" stroke-width="6" opacity="0.7"/>
+  <line x1="270" y1="400" x2="400" y2="400" stroke="#78909c" stroke-width="6" opacity="0.7"/>
+  <line x1="730" y1="320" x2="730" y2="400" stroke="#78909c" stroke-width="6" opacity="0.7"/>
+  <line x1="730" y1="400" x2="600" y2="400" stroke="#78909c" stroke-width="6" opacity="0.7"/>
+  <!-- Flow arrows -->
+  <polygon points="270,395 275,385 265,385" fill="#4fc3f7" opacity="0.6"/>
+  <polygon points="730,395 735,385 725,385" fill="#4fc3f7" opacity="0.6"/>
+  <text x="330" y="395" text-anchor="middle" font-size="9" fill="#78909c">PVC</text>
+  <text x="670" y="395" text-anchor="middle" font-size="9" fill="#78909c">PVC</text>
+
+  <!-- CENTRAL RESERVOIR -->
+  <rect x="370" y="410" width="260" height="180" rx="8" fill="url(#reservoir)" stroke="#00d4aa" stroke-width="2"/>
+  <!-- Water -->
+  <rect x="374" y="440" width="252" height="146" rx="5" fill="url(#water)" opacity="0.8"/>
+  <!-- Air stone -->
+  <ellipse cx="500" cy="575" rx="35" ry="6" fill="#666" stroke="#888" stroke-width="1"/>
+  <text x="500" y="578" text-anchor="middle" font-size="7" fill="#ccc">Air Stone</text>
+  <!-- Bubbles -->
+  <circle cx="490" cy="560" r="2" fill="#4fc3f7" opacity="0.4"/>
+  <circle cx="505" cy="550" r="1.5" fill="#4fc3f7" opacity="0.3"/>
+  <circle cx="495" cy="540" r="2" fill="#4fc3f7" opacity="0.35"/>
+  <circle cx="510" cy="545" r="1.5" fill="#4fc3f7" opacity="0.3"/>
+
+  <text x="500" y="430" text-anchor="middle" font-size="14" font-weight="bold" fill="#00d4aa">Central Reservoir</text>
+  <text x="500" y="445" text-anchor="middle" font-size="10" fill="#aaa">27 gal -- All Sensing + Dosing Here</text>
+
+  <!-- Sensors in reservoir -->
+  <!-- pH probe -->
+  <rect x="420" y="465" width="4" height="40" rx="1" fill="#ab47bc"/>
+  <text x="410" y="490" text-anchor="end" font-size="8" fill="#ab47bc">pH</text>
+  <!-- TDS/EC -->
+  <rect x="445" y="465" width="4" height="40" rx="1" fill="#26a69a"/>
+  <text x="460" y="490" text-anchor="start" font-size="8" fill="#26a69a">TDS/EC</text>
+  <!-- DS18B20 -->
+  <rect x="560" y="465" width="4" height="40" rx="1" fill="#f44336"/>
+  <text x="575" y="490" text-anchor="start" font-size="8" fill="#f44336">DS18B20</text>
+
+  <!-- Stainless Steel Chiller Coil in reservoir -->
+  <path d="M 400,500 Q 415,490 430,500 Q 445,510 460,500 Q 475,490 490,500 Q 505,510 520,500 Q 535,490 550,500 Q 565,510 580,500 Q 595,490 610,500" fill="none" stroke="#90caf9" stroke-width="2.5" opacity="0.7"/>
+  <text x="505" y="515" text-anchor="middle" font-size="8" fill="#90caf9">Silicone Chiller Coil</text>
+
+  <!-- Dosing pumps feeding into reservoir -->
+  <text x="500" y="530" text-anchor="middle" font-size="9" fill="#66bb6a">Peristaltic Pumps Dose Here</text>
+  <!-- Pump labels -->
+  <rect x="380" y="538" width="50" height="16" rx="3" fill="#1b5e20" stroke="#4caf50" stroke-width="1"/>
+  <text x="405" y="549" text-anchor="middle" font-size="7" fill="#a5d6a7">pH Down</text>
+  <rect x="435" y="538" width="50" height="16" rx="3" fill="#1b5e20" stroke="#4caf50" stroke-width="1"/>
+  <text x="460" y="549" text-anchor="middle" font-size="7" fill="#a5d6a7">pH Up</text>
+  <rect x="490" y="538" width="55" height="16" rx="3" fill="#0d47a1" stroke="#42a5f5" stroke-width="1"/>
+  <text x="517" y="549" text-anchor="middle" font-size="7" fill="#90caf9">Nut A</text>
+  <rect x="550" y="538" width="55" height="16" rx="3" fill="#0d47a1" stroke="#42a5f5" stroke-width="1"/>
+  <text x="577" y="549" text-anchor="middle" font-size="7" fill="#90caf9">Nut B</text>
+
+  <!-- Return pump (from reservoir back to buckets via top-feed) -->
+  <text x="500" y="610" text-anchor="middle" font-size="9" fill="#4fc3f7">Water Pump (return to drip rings)</text>
+  <!-- Return lines up to drip rings -->
+  <path d="M 450,600 L 450,620 L 150,620 L 150,145 L 215,145" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="6,3" opacity="0.5"/>
+  <path d="M 550,600 L 550,620 L 850,620 L 850,145 L 810,145" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="6,3" opacity="0.5"/>
+  <text x="150" y="385" text-anchor="middle" font-size="8" fill="#4fc3f7" transform="rotate(-90, 150, 385)">Return Line</text>
+  <text x="850" y="385" text-anchor="middle" font-size="8" fill="#4fc3f7" transform="rotate(90, 850, 385)">Return Line</text>
+
+  <!-- CHILLER UNIT (right side) -->
+  <rect x="870" y="440" width="120" height="120" rx="6" fill="#1a237e" stroke="#5c6bc0" stroke-width="1.5"/>
+  <text x="930" y="460" text-anchor="middle" font-size="10" font-weight="bold" fill="#7986cb">DIY Chiller</text>
+  <!-- Peltier -->
+  <rect x="890" y="470" width="80" height="12" rx="2" fill="#c62828"/>
+  <text x="930" y="480" text-anchor="middle" font-size="7" fill="#fff">TEC1-12709 Peltier</text>
+  <!-- Cold block -->
+  <rect x="900" y="485" width="60" height="15" rx="2" fill="#0277bd"/>
+  <text x="930" y="496" text-anchor="middle" font-size="7" fill="#b3e5fc">Water Block (cold)</text>
+  <!-- Hot side -->
+  <rect x="900" y="504" width="60" height="15" rx="2" fill="#e65100"/>
+  <text x="930" y="515" text-anchor="middle" font-size="7" fill="#ffe0b2">CPU Cooler (hot)</text>
+  <!-- Pump -->
+  <rect x="895" y="525" width="70" height="14" rx="2" fill="#37474f"/>
+  <text x="930" y="535" text-anchor="middle" font-size="7" fill="#b0bec5">Diaphragm Pump</text>
+  <text x="930" y="555" text-anchor="middle" font-size="7" fill="#9e9e9e">12V 30A PSU</text>
+
+  <!-- Chiller loop lines (to reservoir coil) -->
+  <path d="M 870,490 L 630,490 L 615,500" fill="none" stroke="#90caf9" stroke-width="2" stroke-dasharray="4,2" opacity="0.6"/>
+  <path d="M 870,500 L 640,510 L 630,510 L 400,500" fill="none" stroke="#90caf9" stroke-width="2" stroke-dasharray="4,2" opacity="0.6"/>
+  <text x="750" y="485" text-anchor="middle" font-size="7" fill="#90caf9">Distilled Water Loop</text>
+
+  <!-- RASPBERRY PI + RELAY -->
+  <rect x="30" y="440" width="130" height="140" rx="6" fill="#263238" stroke="#546e7a" stroke-width="1.5"/>
+  <text x="95" y="460" text-anchor="middle" font-size="11" font-weight="bold" fill="#80cbc4">Raspberry Pi 4</text>
+  <rect x="40" y="468" width="110" height="14" rx="2" fill="#1b5e20"/>
+  <text x="95" y="479" text-anchor="middle" font-size="8" fill="#a5d6a7">16-Ch Relay Board</text>
+  <text x="95" y="498" text-anchor="middle" font-size="8" fill="#b0bec5">GPIO Control</text>
+  <text x="95" y="512" text-anchor="middle" font-size="7" fill="#78909c">Ch 1: Light (AC)</text>
+  <text x="95" y="523" text-anchor="middle" font-size="7" fill="#78909c">Ch 2: Air Pump (AC)</text>
+  <text x="95" y="534" text-anchor="middle" font-size="7" fill="#78909c">Ch 3: Exhaust Fan (AC)</text>
+  <text x="95" y="545" text-anchor="middle" font-size="7" fill="#78909c">Ch 4: Chiller (DC)</text>
+  <text x="95" y="556" text-anchor="middle" font-size="7" fill="#78909c">Ch 5-8: Pumps (DC)</text>
+  <text x="95" y="567" text-anchor="middle" font-size="7" fill="#78909c">Ch 9-10: Solenoids</text>
+
+  <!-- Connection lines from Pi to system -->
+  <line x1="160" y1="470" x2="200" y2="220" stroke="#80cbc4" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+  <line x1="160" y1="480" x2="370" y2="500" stroke="#80cbc4" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+
+  <!-- AIR PUMP -->
+  <rect x="30" y="370" width="100" height="35" rx="4" fill="#37474f" stroke="#607d8b" stroke-width="1"/>
+  <text x="80" y="391" text-anchor="middle" font-size="9" fill="#b0bec5">Air Pump (AC)</text>
+  <!-- Air lines -->
+  <line x1="130" y1="385" x2="245" y2="305" stroke="#cfd8dc" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+  <line x1="130" y1="385" x2="500" y2="575" stroke="#cfd8dc" stroke-width="1" stroke-dasharray="3,2" opacity="0.4"/>
+  <line x1="130" y1="385" x2="705" y2="305" stroke="#cfd8dc" stroke-width="1" stroke-dasharray="3,2" opacity="0.5"/>
+
+  <!-- EXHAUST FAN -->
+  <rect x="30" y="310" width="100" height="35" rx="4" fill="#37474f" stroke="#607d8b" stroke-width="1"/>
+  <text x="80" y="325" text-anchor="middle" font-size="8" fill="#b0bec5">Exhaust Fan</text>
+  <text x="80" y="338" text-anchor="middle" font-size="7" fill="#ff9800">On >80F / Off <76F</text>
+
+  <!-- TENT outline -->
+  <rect x="170" y="65" width="660" height="570" rx="10" fill="none" stroke="#444" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="830" y="80" text-anchor="end" font-size="10" fill="#555">5x5x7 Grow Tent</text>
+
+  <!-- Legend -->
+  <rect x="30" y="650" width="940" height="85" rx="6" fill="#111122" stroke="#333" stroke-width="1"/>
+  <text x="50" y="670" font-size="10" fill="#00d4aa" font-weight="bold">System Key:</text>
+  <line x1="50" y1="685" x2="80" y2="685" stroke="#78909c" stroke-width="5"/>
+  <text x="85" y="689" font-size="9" fill="#aaa">PVC pipe (gravity drain)</text>
+  <line x1="220" y1="685" x2="250" y2="685" stroke="#4fc3f7" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="255" y="689" font-size="9" fill="#aaa">Return/top-feed line</text>
+  <line x1="420" y1="685" x2="450" y2="685" stroke="#90caf9" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="455" y="689" font-size="9" fill="#aaa">Chiller loop (distilled)</text>
+  <line x1="640" y1="685" x2="670" y2="685" stroke="#cfd8dc" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="675" y="689" font-size="9" fill="#aaa">Air lines</text>
+
+  <rect x="50" y="700" width="10" height="10" rx="1" fill="#f44336"/>
+  <text x="65" y="709" font-size="9" fill="#aaa">DS18B20 Temp</text>
+  <rect x="170" y="700" width="10" height="10" rx="1" fill="#ab47bc"/>
+  <text x="185" y="709" font-size="9" fill="#aaa">pH Probe</text>
+  <rect x="270" y="700" width="10" height="10" rx="1" fill="#26a69a"/>
+  <text x="285" y="709" font-size="9" fill="#aaa">TDS/EC</text>
+  <rect x="370" y="700" width="10" height="10" rx="1" fill="#ff9800"/>
+  <text x="385" y="709" font-size="9" fill="#aaa">Water Level</text>
+  <text x="500" y="725" font-size="8" fill="#555">All sensing + dosing centralized in reservoir | Gravity drain from buckets | Pump return via drip rings</text>
+</svg>
+</body>
+</html>

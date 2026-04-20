@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Braxtonian Farms</title>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        header {
+            background: linear-gradient(135deg, #1a3a1a, #0d1f0d);
+            padding: 20px 30px;
+            border-bottom: 1px solid #2a5a2a;
+        }
+        header h1 {
+            font-size: 24px;
+            color: #4ade80;
+            font-weight: 600;
+        }
+        header .subtitle {
+            font-size: 13px;
+            color: #6b8f6b;
+            margin-top: 4px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Sensor Cards */
+        .sensors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .sensor-card {
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .sensor-card .label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .sensor-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .sensor-card .unit {
+            font-size: 14px;
+            color: #666;
+            margin-left: 4px;
+        }
+        .sensor-card .range {
+            font-size: 11px;
+            color: #555;
+            margin-top: 6px;
+        }
+        .status-ok { color: #4ade80; }
+        .status-warn { color: #facc15; }
+        .status-danger { color: #ef4444; }
+
+        /* Sections */
+        .section {
+            background: #141414;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            font-size: 16px;
+            color: #4ade80;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        /* Relays */
+        .relay-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .relay-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .relay-btn:hover { border-color: #4ade80; }
+        .relay-btn.on {
+            background: #0f2a0f;
+            border-color: #4ade80;
+        }
+        .relay-btn .relay-name {
+            font-size: 13px;
+            color: #ccc;
+            margin-bottom: 6px;
+        }
+        .relay-btn .relay-state {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .relay-btn.on .relay-state { color: #4ade80; }
+        .relay-btn.off .relay-state { color: #666; }
+
+        /* Plants */
+        .plant-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .plant-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .plant-card h3 {
+            color: #4ade80;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .plant-card .plant-type {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Chart */
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+
+        /* Events */
+        .event-log {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            font-family: monospace;
+        }
+        .event-log .event {
+            padding: 4px 0;
+            border-bottom: 1px solid #1a1a1a;
+            color: #888;
+        }
+        .event-log .event .time {
+            color: #555;
+            margin-right: 8px;
+        }
+
+        /* Alerts */
+        .alerts {
+            margin-bottom: 16px;
+        }
+        .alert {
+            background: #2a1a0a;
+            border: 1px solid #8b5e3c;
+            border-radius: 8px;
+            padding: 10px 16px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #facc15;
+        }
+
+        /* Two column layout */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .two-col { grid-template-columns: 1fr; }
+            .sensors { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Braxtonian Farms</h1>
+        <div class="subtitle">Hydroponic Grow Controller</div>
+    </header>
+
+    <div class="container">
+        <!-- Alerts -->
+        <div class="alerts" id="alerts"></div>
+
+        <!-- Sensor Cards -->
+        <div class="sensors">
+            <div class="sensor-card" id="card-ph">
+                <div class="label">pH</div>
+                <div class="value" id="val-ph">--</div>
+                <div class="range">Target: 5.5 - 6.5</div>
+            </div>
+            <div class="sensor-card" id="card-ec">
+                <div class="label">EC</div>
+                <div class="value" id="val-ec">--<span class="unit">mS/cm</span></div>
+                <div class="range">Target: 1.2 - 2.0</div>
+            </div>
+            <div class="sensor-card" id="card-water">
+                <div class="label">Water Level</div>
+                <div class="value" id="val-water">--%</div>
+                <div class="range">Target: 50% - 100%</div>
+            </div>
+            <div class="sensor-card" id="card-temp">
+                <div class="label">Air Temp</div>
+                <div class="value" id="val-temp">--<span class="unit">F</span></div>
+                <div class="range">Target: 65 - 80 F</div>
+            </div>
+            <div class="sensor-card" id="card-wtemp">
+                <div class="label">Water Temp</div>
+                <div class="value" id="val-wtemp">--<span class="unit">F</span></div>
+                <div class="range">Target: 60 - 72 F</div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- Chart -->
+            <div class="section">
+                <h2>24h History</h2>
+                <div class="chart-container">
+                    <canvas id="chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Relays -->
+            <div class="section">
+                <h2>Controls</h2>
+                <div class="relay-grid" id="relays"></div>
+            </div>
+        </div>
+
+        <div class="two-col">
+            <!-- Plants -->
+            <div class="section">
+                <h2>Plants</h2>
+                <div class="plant-cards">
+                    <div class="plant-card">
+                        <h3>Black Krim Tomato</h3>
+                        <div class="plant-type">Bucket 1 - DWC</div>
+                    </div>
+                    <div class="plant-card">
+                        <h3>Gold Medal Tomato</h3>
+                        <div class="plant-type">Bucket 2 - DWC</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Log -->
+            <div class="section">
+                <h2>Event Log</h2>
+                <div class="event-log" id="events"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let chart = null;
+        const chartData = { ph: [], ec: [], temp: [] };
+
+        // Sensor status color
+        function statusClass(sensor, value) {
+            const targets = {
+                ph: [5.5, 6.5],
+                ec: [1.2, 2.0],
+                water_level: [0.5, 1.0],
+                air_temp: [65, 80],
+                water_temp: [60, 72]
+            };
+            const [min, max] = targets[sensor] || [0, 100];
+            if (value < min || value > max) return 'status-danger';
+            const buffer = (max - min) * 0.15;
+            if (value < min + buffer || value > max - buffer) return 'status-warn';
+            return 'status-ok';
+        }
+
+        // Update sensor display
+        function updateSensors(data) {
+            if (data.ph !== undefined) {
+                const el = document.getElementById('val-ph');
+                el.textContent = data.ph.toFixed(2);
+                el.className = 'value ' + statusClass('ph', data.ph);
+            }
+            if (data.ec !== undefined) {
+                const el = document.getElementById('val-ec');
+                el.innerHTML = data.ec.toFixed(2) + '<span class="unit">mS/cm</span>';
+                el.className = 'value ' + statusClass('ec', data.ec);
+            }
+            if (data.water_level !== undefined) {
+                const el = document.getElementById('val-water');
+                el.textContent = Math.round(data.water_level * 100) + '%';
+                el.className = 'value ' + statusClass('water_level', data.water_level);
+            }
+            if (data.air_temp !== undefined) {
+                const el = document.getElementById('val-temp');
+                el.innerHTML = data.air_temp.toFixed(1) + '<span class="unit">F</span>';
+                el.className = 'value ' + statusClass('air_temp', data.air_temp);
+            }
+            if (data.water_temp !== undefined) {
+                const el = document.getElementById('val-wtemp');
+                el.innerHTML = data.water_temp.toFixed(1) + '<span class="unit">F</span>';
+                el.className = 'value ' + statusClass('water_temp', data.water_temp);
+            }
+        }
+
+        // Update alerts
+        function updateAlerts(alerts) {
+            const el = document.getElementById('alerts');
+            if (!alerts || alerts.length === 0) {
+                el.innerHTML = '';
+                return;
+            }
+            el.innerHTML = alerts.map(a => `<div class="alert">${a}</div>`).join('');
+        }
+
+        // Update relays
+        function updateRelays(relays) {
+            const el = document.getElementById('relays');
+            if (!relays) return;
+            el.innerHTML = Object.entries(relays).map(([ch, r]) => `
+                <div class="relay-btn ${r.state ? 'on' : 'off'}" onclick="toggleRelay(${ch})">
+                    <div class="relay-name">${r.name}</div>
+                    <div class="relay-state">${r.state ? 'ON' : 'OFF'}</div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle relay
+        async function toggleRelay(channel) {
+            await fetch(`/api/relay/${channel}/toggle`, { method: 'POST' });
+        }
+
+        // Init chart
+        function initChart() {
+            const ctx = document.getElementById('chart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: 'pH', data: [], borderColor: '#4ade80', borderWidth: 1.5, pointRadius: 0, yAxisID: 'y' },
+                        { label: 'EC', data: [], borderColor: '#60a5fa', borderWidth: 1.5, pointRadius: 0, yAxisID: 'y1' },
+                        { label: 'Temp', data: [], borderColor: '#facc15', borderWidth: 1.5, pointRadius: 0, yAxisID: 'y2' },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { labels: { color: '#888', font: { size: 11 } } } },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            display: false,
+                        },
+                        y: {
+                            position: 'left',
+                            min: 4, max: 8,
+                            ticks: { color: '#4ade80', font: { size: 10 } },
+                            grid: { color: '#1a1a1a' },
+                        },
+                        y1: {
+                            position: 'right',
+                            min: 0, max: 3,
+                            ticks: { color: '#60a5fa', font: { size: 10 } },
+                            grid: { display: false },
+                        },
+                        y2: {
+                            display: false,
+                            min: 60, max: 90,
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add point to chart
+        let chartIndex = 0;
+        function addChartPoint(data) {
+            if (!chart) return;
+            chart.data.datasets[0].data.push({ x: chartIndex, y: data.ph });
+            chart.data.datasets[1].data.push({ x: chartIndex, y: data.ec });
+            chart.data.datasets[2].data.push({ x: chartIndex, y: data.air_temp });
+            chartIndex++;
+            // Keep last 200 points
+            if (chartIndex > 200) {
+                chart.data.datasets.forEach(ds => ds.data.shift());
+            }
+            chart.update('none');
+        }
+
+        // Load events
+        async function loadEvents() {
+            const resp = await fetch('/api/events');
+            const events = await resp.json();
+            const el = document.getElementById('events');
+            el.innerHTML = events.map(e => {
+                const time = new Date(e.t).toLocaleTimeString();
+                return `<div class="event"><span class="time">${time}</span>${e.msg}</div>`;
+            }).join('');
+        }
+
+        // Socket events
+        socket.on('sensor_update', (data) => {
+            updateSensors(data);
+            updateAlerts(data.alerts);
+            updateRelays(data.relays);
+            addChartPoint(data);
+        });
+
+        // Init
+        initChart();
+        loadEvents();
+        setInterval(loadEvents, 30000);
+
+        // Load initial state
+        fetch('/api/status').then(r => r.json()).then(data => {
+            if (data.readings) updateSensors(data.readings);
+            if (data.relays) updateRelays(data.relays);
+        });
+    </script>
+</body>
+</html>
